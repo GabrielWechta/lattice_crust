@@ -1,4 +1,4 @@
-pub fn scal_mul_vec(scalar: i64, vec: &Vec<f64>) -> Vec<f64> {
+pub fn scal_mul_vec(scalar: i32, vec: &Vec<f64>) -> Vec<f64> {
     vec.iter().map(|x| x * scalar as f64).collect()
 }
 
