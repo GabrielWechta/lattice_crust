@@ -1,4 +1,5 @@
 pub mod matrix {
+    use crate::utils::dot_prod_vecs;
     use std::fmt::Debug;
     use std::ops::{Add, AddAssign, Div, Mul, Neg, Sub};
     use std::vec;
@@ -30,9 +31,9 @@ pub mod matrix {
                 )
             }
             Matrix {
-                elements,
-                rows_num,
-                cols_num,
+                elements: elements,
+                rows_num: rows_num,
+                cols_num: cols_num,
             }
         }
     }
@@ -164,6 +165,75 @@ pub mod matrix {
             }
 
             Matrix::new(result_elements)
+        }
+    }
+    impl Clone for Matrix<f64> {
+        fn clone(&self) -> Self {
+            let mut elements = vec![vec![0.0; self.cols_num]; self.rows_num];
+            for i in 0..self.rows_num {
+                for j in 0..self.cols_num {
+                    elements[i][j] = self.elements[i][j];
+                }
+            }
+            Matrix {
+                elements,
+                rows_num: self.rows_num,
+                cols_num: self.cols_num,
+            }
+        }
+    }
+    impl Matrix<f64> {
+        pub fn to_row_echelon_form(&mut self) {
+            let mut lead_ind = 0;
+            for row in 0..self.rows_num {
+                let mut lead_row = row;
+                while lead_row < self.rows_num && self.elements[lead_row][lead_ind] == 0.0 {
+                    lead_row += 1;
+                }
+                if lead_row < self.rows_num {
+                    self.elements.swap(lead_row, row);
+                }
+                let lead_entry = self.elements[row][lead_ind];
+                if lead_entry != 0.0 {
+                    for j in 0..self.cols_num {
+                        self.elements[row][j] = self.elements[row][j] / lead_entry;
+                    }
+                    for r in row + 1..self.rows_num {
+                        if self.elements[r][lead_ind] != 0.0 {
+                            let scalar = -self.elements[r][lead_ind];
+                            for j in 0..self.cols_num {
+                                self.elements[r][j] += scalar * self.elements[row][j];
+                            }
+                        }
+                    }
+                    lead_ind += 1;
+                }
+            }
+        }
+        pub fn check_independence(&self) -> bool {
+            let mut test_mat = self.clone();
+            test_mat.to_row_echelon_form();
+            if test_mat.elements[self.rows_num - 1][self.cols_num - 1] == 0.0 {
+                return false;
+            } else {
+                return true;
+            }
+        }
+        pub fn gram_schmidt_orthonormalization(&mut self) {
+            let mut ortho_basis = self.clone();
+            for i in 0..self.rows_num {
+                for j in 0..i {
+                    let dot_product = dot_prod_vecs(&self.elements[i], &ortho_basis.elements[j]);
+                    for k in 0..self.cols_num {
+                        ortho_basis.elements[i][k] -= dot_product * ortho_basis.elements[j][k];
+                    }
+                }
+                let norm = dot_prod_vecs(&self.elements[i], &self.elements[i]).sqrt();
+                for k in 0..self.cols_num {
+                    ortho_basis.elements[i][k] /= norm;
+                }
+            }
+            self.elements = ortho_basis.elements;
         }
     }
 }

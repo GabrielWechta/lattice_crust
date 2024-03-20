@@ -6,7 +6,10 @@ mod matrix;
 mod utils;
 
 fn main() {
-    let b = Matrix::new(vec![vec![7.1, 0.6], vec![-6.1, 0.2]]);
+    let mut b = Matrix::new(vec![vec![1.0, 0.0], vec![0.0, 1.0]]);
+    // b.gram_schmidt_orthonormalization();
+    // println!("{:?}", b.elements);
     let l = Lattice::new(b);
+    println!("{:?}", l.get_volume());
     l.plot_lattice();
 }
