@@ -108,4 +108,9 @@ pub mod lattice {
         }
         Matrix::new(span)
     }
+
+    pub fn are_two_bases_gen_same_lattice(basis1: &Matrix<f64>, basis2: &Matrix<f64>) -> bool {
+        let mat = basis1.clone().inverse().unwrap() * basis2.clone();
+        mat.is_unimodular()
+    }
 }

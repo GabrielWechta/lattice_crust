@@ -1,8 +1,9 @@
 pub mod matrix {
-    use crate::utils::dot_prod_vecs;
+    use crate::utils::{dot_prod_vecs, normalize_vec};
     use std::fmt::Debug;
     use std::ops::{Add, AddAssign, Div, Mul, Neg, Sub};
     use std::vec;
+    
 
     pub struct Matrix<T> {
         pub elements: Vec<Vec<T>>,
@@ -219,21 +220,26 @@ pub mod matrix {
                 return true;
             }
         }
-        pub fn gram_schmidt_orthonormalization(&mut self) {
-            let mut ortho_basis = self.clone();
+        pub fn gram_schmidt_orthogonalization(&mut self, normalize: bool) {
+            let mut basis = Vec::new();
             for i in 0..self.rows_num {
+                let mut new_vec = self.elements[i].clone();
                 for j in 0..i {
-                    let dot_product = dot_prod_vecs(&self.elements[i], &ortho_basis.elements[j]);
-                    for k in 0..self.cols_num {
-                        ortho_basis.elements[i][k] -= dot_product * ortho_basis.elements[j][k];
+                    let projection_scalar = dot_prod_vecs(&self.elements[i], &basis[j]) / dot_prod_vecs(&basis[j], &basis[j]);
+                    for k in 0..new_vec.len() {
+                        new_vec[k] -= projection_scalar * basis[j][k];
                     }
                 }
-                let norm = dot_prod_vecs(&self.elements[i], &self.elements[i]).sqrt();
-                for k in 0..self.cols_num {
-                    ortho_basis.elements[i][k] /= norm;
+                if normalize {
+                    normalize_vec(&mut new_vec);
                 }
+                basis.push(new_vec);
             }
-            self.elements = ortho_basis.elements;
+            self.elements = basis;
+
+        }
+        pub fn is_unimodular(&self) -> bool {
+            return self.determinant() == 1.0;
         }
     }
 }

@@ -13,3 +13,10 @@ pub fn add_vecs(vec1: &Vec<f64>, vec2: &Vec<f64>) -> Vec<f64> {
     }
     return_vec
 }
+
+pub fn normalize_vec(vec: &mut Vec<f64>) {
+    let norm = vec.iter().map(|&x| x * x).sum::<f64>().sqrt();
+    for elem in vec.iter_mut() {
+        *elem /= norm;
+    }
+}
