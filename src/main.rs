@@ -11,5 +11,5 @@ fn main() {
     // println!("{:?}", b.elements);
     let l = Lattice::new(b);
     println!("{:?}", l.get_volume());
-    l.plot_lattice();
+    l.plot_lattice(20);
 }

@@ -21,29 +21,36 @@ pub mod lattice {
             if basis.check_independence() == false {
                 panic!("Basis is not independent");
             }
-            let minkowski_first_theorem_distance = self.get_minkowski_first_theorem_distance();
-            println!("Minkowski first theorem distance: {}", radius);
+            let minkowski_first_theorem_distance = get_minkowski_first_theorem_distance(&basis);
+            println!(
+                "Minkowski first theorem distance: {}",
+                minkowski_first_theorem_distance
+            );
             Lattice {
                 dimension: basis.rows_num,
                 basis: basis,
                 spanned_elements: spanned_elements,
+                minkowski_first_theorem_distance: minkowski_first_theorem_distance,
             }
         }
 
-        pub fn plot_lattice(&self) {
+        pub fn plot_lattice(&self, axis_range: i32) {
             let data = self.spanned_elements.elements.clone();
-            let radius = 30.0 *
-
+            let axis_range_one_way = axis_range as f64 / 2.0;
+            let axis_pixels = 600;
+            let radius =
+                (axis_pixels as f64 / axis_range as f64) * self.minkowski_first_theorem_distance;
             let root_drawing_area =
-                BitMapBackend::new("lattice_plot.png", (600, 600)).into_drawing_area();
-            let x_range = -10.0..10.0;
-            let y_range = -10.0..10.0;
+                BitMapBackend::new("lattice_plot.png", (axis_pixels, axis_pixels))
+                    .into_drawing_area();
+            let x_range = -axis_range_one_way..axis_range_one_way;
+            let y_range = -axis_range_one_way..axis_range_one_way;
 
             root_drawing_area.fill(&WHITE).unwrap();
             let mut ctx = ChartBuilder::on(&root_drawing_area)
                 .caption(
                     format!("Lattice plot (B={:?})", self.basis.elements),
-                    ("Arial", 10),
+                    ("Arial", 15),
                 )
                 .set_label_area_size(LabelAreaPosition::Left, 40)
                 .set_label_area_size(LabelAreaPosition::Bottom, 40)
@@ -71,18 +78,16 @@ pub mod lattice {
                     .map(|point| Circle::new((point[0], point[1]), 2, MAGENTA.filled())),
             );
 
-
             ctx.configure_mesh().draw().unwrap();
         }
         pub fn get_volume(&self) -> f64 {
             self.basis.determinant().abs()
         }
-        pub fn get_minkowski_first_theorem_distance(&self) -> f64 {
-            let dim_f = self.dimension as f64;
-            dim_f.sqrt() * self.get_volume().powf(1.0 / dim_f)
-        }
     }
-
+    pub fn get_minkowski_first_theorem_distance(basis: &Matrix<f64>) -> f64 {
+        let dim_f = basis.rows_num as f64;
+        dim_f.sqrt() * basis.determinant().abs().powf(1.0 / dim_f)
+    }
     pub fn span(basis: &Matrix<f64>, z_range: (i32, i32)) -> Matrix<f64> {
         let z_left = z_range.0;
         let z_right = z_range.1;
